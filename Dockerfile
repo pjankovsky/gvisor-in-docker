@@ -60,19 +60,18 @@ RUN curl -fsSL https://gvisor.dev/archive.key | gpg --dearmor -o /usr/share/keyr
 
 RUN apt-get update && apt-get install -y runsc
 
+# limit exposed container ports to localhost only
+RUN echo '{"ip": "127.0.0.1"}' > /etc/docker/daemon.json
+
 # we need -ignore-cgroups to play nice inside a cgroup already
 RUN runsc install -- \
     -ignore-cgroups
 
-# entrypoint script
-COPY start-docker.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/start-docker.sh
-
 # my scripts
 WORKDIR /work
 
-COPY test.sh ./
+COPY start-docker.sh lockdown-networking.sh ./
 RUN chmod +x *.sh
 
-ENTRYPOINT ["start-docker.sh"]
+ENTRYPOINT ["./start-docker.sh"]
 CMD []
