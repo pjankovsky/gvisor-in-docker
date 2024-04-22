@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pbj-gvisor-testing
+  labels:
+    app: pbj-gvisor-testing
+spec:
+  containers:
+    - name: dind-host
+      image: us-docker.pkg.dev/build-286712/non-prod-docker-us/peterj/gvisor:amd-v1
+      imagePullPolicy: Always
+      securityContext:
+        privileged: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits:
+          memory: 1Gi
+  restartPolicy: Never
+  terminationGracePeriodSeconds: 5
+

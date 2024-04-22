@@ -1,0 +1,46 @@
+FROM linuxkit/containerd:v1.0.0 as containerd
+
+#FROM ubuntu:jammy as build
+FROM ubuntu:jammy
+
+RUN apt-get update && apt-get install -y containerd
+
+RUN apt-get update && \
+    apt-get install -y apt-transport-https ca-certificates curl gnupg && \
+    curl -fsSL https://gvisor.dev/archive.key | gpg --dearmor -o /usr/share/keyrings/gvisor-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/gvisor-archive-keyring.gpg] https://storage.googleapis.com/gvisor/releases release main" | tee /etc/apt/sources.list.d/gvisor.list > /dev/null
+
+#COPY --from=containerd /usr/bin/containerd /usr/bin/ctr /usr/bin/containerd-shim /usr/bin/containerd-shim-runc-v2 /usr/bin/
+#COPY --from=containerd /etc/containerd/config.toml /etc/containerd/
+
+RUN apt-get update && apt-get install -y runsc
+
+RUN apt-get install -y wget vim
+
+RUN wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.13.0/crictl-v1.13.0-linux-amd64.tar.gz && \
+    tar xf crictl-v1.13.0-linux-amd64.tar.gz && \
+    mv crictl /usr/local/bin/
+
+RUN wget https://github.com/containernetworking/plugins/releases/download/v1.4.1/cni-plugins-linux-arm64-v1.4.1.tgz && \
+    mkdir -p /opt/cni/bin && \
+    tar Cxzf /opt/cni/bin cni-plugins-linux-arm64-v1.4.1.tgz
+
+#FROM ubuntu:jammy
+
+RUN echo "runtime-endpoint: unix:///run/containerd/containerd.sock" > /etc/crictl.yaml
+
+#COPY --from=build /usr/bin/containerd /usr/bin/ctr /usr/bin/containerd-shim /usr/bin/containerd-shim-runc-v2 /usr/bin/containerd-shim-runsc-v1 /usr/bin/runsc /usr/bin/
+#COPY --from=build /usr/local/bin/crictl /usr/local/bin/
+#COPY --from=build /etc/containerd/ /etc/containerd/
+
+COPY containered-config.toml /etc/containerd/config.toml
+COPY net.d-10-containerd-net.conflist /etc/cni/net.d/10-containerd-net.conflist
+
+
+WORKDIR /project
+
+COPY sandbox.json container.json startup.sh ./
+
+RUN chmod +x startup.sh
+
+ENTRYPOINT ["/project/startup.sh"]
