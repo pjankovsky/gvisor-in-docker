@@ -107,7 +107,7 @@ find /run /var/run -iname 'docker*.pid' -delete || :
 # use legacy iptables
 export PATH="/usr/local/sbin/.iptables-legacy:$PATH"
 
-./lockdown-networking.sh
+./lockdown-networking.sh &
 
 # start docker
 docker-init -- dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2376 --tlsverify --tlscacert "$DOCKER_TLS_CERTDIR/server/ca.pem" --tlscert "$DOCKER_TLS_CERTDIR/server/cert.pem" --tlskey "$DOCKER_TLS_CERTDIR/server/key.pem"
