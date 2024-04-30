@@ -61,7 +61,8 @@ RUN mkdir /certs /certs/client \
 	&& echo 'dockremap:165536:65536' >> /etc/subgid \
     && cp /usr/bin/tini-static /usr/local/bin/docker-init \
     && echo '{"ip": "127.0.0.1"}' > /etc/docker/daemon.json \
-    && runsc install -- -ignore-cgroups
+    && runsc install -- -ignore-cgroups \
+    && runsc install --runtime runsc-debug -- -ignore-cgroups -debug -debug-log=/tmp/runsc/ -strace -log-packets
 
 # needed?
 # VOLUME /var/lib/docker

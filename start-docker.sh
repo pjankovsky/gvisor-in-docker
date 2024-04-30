@@ -107,6 +107,8 @@ find /run /var/run -iname 'docker*.pid' -delete || :
 # use legacy iptables
 export PATH="/usr/local/sbin/.iptables-legacy:$PATH"
 
+capsh --print
+
 ./lockdown-networking.sh &
 
 # start docker
